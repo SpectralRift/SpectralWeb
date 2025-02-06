@@ -10,6 +10,10 @@ class Color {
         this.b = b;
         this.a = a;
     }
+
+    public toArrayBuffer(): Uint8Array {
+        return new Uint8Array([this.r, this.g, this.b, this.a]);
+    }
 }
 
 const Colors = {

@@ -77,7 +77,7 @@ class RiftRunner {
 
             // render only if the surface is focused and the engine is running;
             if(this.isRunning && this.surface.isFocused()) {
-                this.surface.getGContext().getBackend().clear(Colors.blue);
+                this.surface.getGContext().getBackend().clear(Colors.black);
 
                 // use the renderer to render stuff on the screen
                 if(this.renderer) {

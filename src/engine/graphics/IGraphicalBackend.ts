@@ -1,4 +1,7 @@
 import { Color } from "./Color";
+import { IShader } from "./IShader";
+import { IShaderProgram } from "./IShaderProgram";
+import { IVertexBuffer } from "./IVertexBuffer";
 
 interface IGraphicalBackend {
     getName(): string;
@@ -9,9 +12,9 @@ interface IGraphicalBackend {
 
     clear(color: Color) : void;
 
-    // createVertexBuffer() : IVertexBuffer;
-    // createShader() : IShader;
-    // createShaderProgram(): IShaderProgram;
+    createVertexBuffer() : IVertexBuffer;
+    createShader() : IShader;
+    createShaderProgram(): IShaderProgram;
     // createTexture() : ITexture;
 }
 
