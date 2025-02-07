@@ -1,11 +1,13 @@
-import { Colors } from "../../engine/graphics/Color";
+import { mat4 } from "gl-matrix";
 import { ICamera } from "../../engine/graphics/ICamera";
 import { IGraphicsContext } from "../../engine/graphics/IGraphicsContext";
-import { IRenderer } from "../../engine/graphics/IRenderer";
+import { IRenderer, RenderMeshItem } from "../../engine/graphics/IRenderer";
 import { ShaderType } from "../../engine/graphics/IShader";
 import { IShaderProgram } from "../../engine/graphics/IShaderProgram";
-import { BufferUsageHint, IVertexBuffer } from "../../engine/graphics/IVertexBuffer";
-import { PrimitiveType, Vertex } from "../../engine/graphics/Vertex";
+import { IVertexBuffer } from "../../engine/graphics/IVertexBuffer";
+import { Vector3 } from "../../engine/math/Vector3";
+import { Vector2 } from "../../engine/math/Vector2";
+
 
 const ShaderList = {
 	webgl: {
@@ -24,12 +26,9 @@ class SimpleRenderer implements IRenderer {
 	private uiRenderShader: IShaderProgram;
 	private uiVertexBuffer: any;
 
-	private meshQueue: any[] = [];
-	private uiQueue: any[] = [];
+	private meshQueue: RenderMeshItem[] = [];
 
 	private isInFrame: boolean = false;
-
-	private testVertexBuffer: IVertexBuffer;
 
 	public init(ctx: IGraphicsContext): boolean {
 		this.ctx = ctx;
@@ -79,17 +78,11 @@ class SimpleRenderer implements IRenderer {
 		console.info("SimpleRenderer (init): 3D Shaders linked successfully.");
 		this.renderShader = renderShaderProg;
 
-		this.testVertexBuffer = this.ctx.getBackend().createVertexBuffer();
-		if(!this.testVertexBuffer.create()) {
-			console.error("SimpleRenderer (init): Failed to create vertex buffer.");
-			return false;
-		}
-
-		this.testVertexBuffer.upload([
-			new Vertex(-0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Colors.green),
-            new Vertex(0.5,  -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Colors.red),
-            new Vertex(0.0,  0.5,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Colors.blue)
-		], PrimitiveType.PRIMITIVE_TYPE_TRIANGLES, BufferUsageHint.BUFFER_USAGE_HINT_STATIC);
+		// create white pixel texture
+		this.whitePixelTex = this.ctx.getBackend().createTexture();
+		this.whitePixelTex.uploadPixelData(new Uint8Array(
+			[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+		), new Vector2(1, 1));
 
 		this.resetState();
 
@@ -99,7 +92,7 @@ class SimpleRenderer implements IRenderer {
 	private resetState() : void {
 		// clear queue
 		this.meshQueue = [];
-		this.uiQueue = [];
+		// this.uiQueue = [];
 
 		this.isInFrame = false;
 		this.currentCamera = null;
@@ -124,15 +117,50 @@ class SimpleRenderer implements IRenderer {
 			return;
 		}
 
-		this.renderShader.bind();
+		if(this.currentCamera !== null) {
+			this.renderShader.bind();
 
-		this.testVertexBuffer.bind();
-		this.testVertexBuffer.draw();
-		this.testVertexBuffer.unbind();
+			this.renderShader.setUniformNumber("sTexture", 0); // set texture sampler for GL
+			this.renderShader.setUniformMat4("ufProjMatrix", this.currentCamera.getProjectionMatrix());
+			this.renderShader.setUniformMat4("ufViewMatrix", this.currentCamera.getViewMatrix());
 
-		this.renderShader.unbind();
+			this.meshQueue.forEach((mesh) => {
+				this.renderShader.bind();
+
+				// set model matrix
+				const model = mat4.create();
+				mat4.translate(model, model, [mesh.position.x, mesh.position.y, mesh.position.z]);
+				mat4.rotate(model, model, (mesh.rotation.x * Math.PI) / 180, [1, 0, 0]);
+				mat4.rotate(model, model, (mesh.rotation.y * Math.PI) / 180, [0, 1, 0]);
+				mat4.rotate(model, model, (mesh.rotation.z * Math.PI) / 180, [0, 0, 1]);
+				mat4.scale(model, model, [mesh.scale.x, mesh.scale.y, mesh.scale.z]);
+				this.renderShader.setUniformMat4("ufModelMatrix", model);
+
+				mesh.buffer.bind();
+				mesh.texture.bind(0);
+
+				mesh.buffer.draw();
+
+				mesh.buffer.unbind();
+				mesh.texture.unbind();
+			});
+
+			this.renderShader.unbind();
+		} else {
+			console.warn("SimpleRenderer (endFrame): No camera set. Cannot render 3D.");
+		}
 
 		this.resetState();
+	}
+
+	public queueMesh(buffer: IVertexBuffer, texture?: any, position?: Vector3, scale?: Vector3, rotation?: Vector3): void {
+		this.meshQueue.push(new RenderMeshItem(
+			buffer,
+			texture || this.whitePixelTex,
+			position || new Vector3(0, 0, 0),
+			scale || new Vector3(1, 1, 1),
+			rotation || new Vector3(0, 0, 0)
+		));
 	}
 
 	public useCamera(camera: ICamera): void {

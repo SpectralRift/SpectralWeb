@@ -7,7 +7,5 @@ varying vec4 fragColor;
 uniform sampler2D sTexture;
 
 void main() {
-    // outColor = texture2D(sTexture, fragUV) * fragColor;
-    
-    gl_FragColor = fragColor;
+    gl_FragColor = texture2D(sTexture, fragUV) * fragColor;
 }

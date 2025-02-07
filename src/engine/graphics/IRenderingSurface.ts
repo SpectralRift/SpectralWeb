@@ -1,11 +1,11 @@
+import { Vector2 } from "../math/Vector2";
 import { IGraphicsContext } from "./IGraphicsContext";
 
 interface IRenderingSurface {
     getGContext(): IGraphicsContext;
     getNativeSurface(): any;
 
-    getWidth(): number;
-    getHeight(): number;
+    getSize(): Vector2;
 
     isFocused(): boolean;
 }

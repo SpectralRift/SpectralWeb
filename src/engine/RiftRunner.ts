@@ -1,6 +1,7 @@
 import { Colors } from "./graphics/Color";
 import { IRenderer } from "./graphics/IRenderer";
 import { IRenderingSurface } from "./graphics/IRenderingSurface";
+import { IApp } from "./IApp";
 
 class RiftRunner {
 	private static isRunning: boolean;
@@ -10,6 +11,8 @@ class RiftRunner {
     
     private static renderer: IRenderer;
 	private static surface: IRenderingSurface;
+
+	private static app: IApp;
 
 	public static setSurface(surface: IRenderingSurface) {
 		this.surface = surface;
@@ -27,9 +30,14 @@ class RiftRunner {
         return this.renderer;
     }
 
-	public static runApp() {
+	public static runApp(app: IApp) {
 		if (this.isRunning) {
 			console.error("RiftRunner (runApp): Already running.");
+			return;
+		}
+
+		if (app === undefined) {
+			console.error("RiftRunner (runApp): No app instance provided.");
 			return;
 		}
 
@@ -52,6 +60,13 @@ class RiftRunner {
 
 		this.isFirstFrame = true;
         this.isRunning = true;
+		this.app = app;
+
+		if (!this.app.onStart(this.renderer, this.surface.getGContext())) {
+			console.error("RiftRunner (runApp): App failed to start.");
+			return;
+		}
+
 		this.animFrameId = requestAnimationFrame(this.onFrame.bind(this));
 	}
 
@@ -63,7 +78,9 @@ class RiftRunner {
 
         console.info("RiftRunner (shutdown): Shutting down runner loop.");
 
+		this.app.onShutdown();
         this.isRunning = false;
+
         cancelAnimationFrame(this.animFrameId);
         this.lastFrameTimestamp = 0;
     }
@@ -79,9 +96,12 @@ class RiftRunner {
             if(this.isRunning && this.surface.isFocused()) {
                 this.surface.getGContext().getBackend().clear(Colors.black);
 
+				this.app.onUpdate(delta);
+
                 // use the renderer to render stuff on the screen
                 if(this.renderer) {
                     this.renderer.beginFrame();
+					this.app.onRender(delta);
                     this.renderer.endFrame();
                 }
             }

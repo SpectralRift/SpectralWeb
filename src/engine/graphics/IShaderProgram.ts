@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import { IShader } from "./IShader";
 
 interface IShaderProgram {
@@ -6,12 +7,10 @@ interface IShaderProgram {
 	bind(): void;
 	unbind(): void;
 	attachShader(shader: IShader): void;
-    setUniformMat4(name: string, mat: number[]): void;
+    setUniformMat4(name: string, mat: mat4): void;
 	setUniformNumber(name: string, val: number): void;
 	getLinkLog(): string;
 	isLinked(): boolean;
-
-	// void SetUniformMat4(string name, const glm::mat4 &mat);
 }
 
 export { IShaderProgram };

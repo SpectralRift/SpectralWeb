@@ -1,8 +1,11 @@
-interface ICamera {
-	getProjectionMatrix(): number[];
-	getViewMatrix(): number[];
+import { mat4 } from "gl-matrix";
+import { Vector2 } from "../math/Vector2";
 
-	update(width: number, height: number): void;
+interface ICamera {
+	getProjectionMatrix(): mat4;
+	getViewMatrix(): mat4;
+
+	update(viewportSize: Vector2): void;
 }
 
 export { ICamera };

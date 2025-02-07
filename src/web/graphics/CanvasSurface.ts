@@ -1,5 +1,6 @@
 import { IGraphicsContext } from "../../engine/graphics/IGraphicsContext";
 import { IRenderingSurface } from "../../engine/graphics/IRenderingSurface";
+import { Vector2 } from "../../engine/math/Vector2";
 import { WebGLContext } from "./WebGLContext";
 
 class CanvasSurface implements IRenderingSurface {
@@ -15,12 +16,8 @@ class CanvasSurface implements IRenderingSurface {
         this.gContext = new WebGLContext(this);
     }
 
-    public getWidth(): number {
-        return this.canvas.width;
-    }
-
-    public getHeight(): number {
-        return this.canvas.height;
+    public getSize(): Vector2 {
+        return new Vector2(this.canvas.width, this.canvas.height);
     }
 
     public getGContext(): IGraphicsContext {

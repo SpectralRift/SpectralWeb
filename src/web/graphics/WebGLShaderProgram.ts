@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import { IShader } from "../../engine/graphics/IShader";
 import { IShaderProgram } from "../../engine/graphics/IShaderProgram";
 import { WebGLShader } from "./WebGLShader";
@@ -64,7 +65,7 @@ class WebGLShaderProgram implements IShaderProgram {
 		}
 	}
 
-	public setUniformMat4(name: string, mat: number[]): void {
+	public setUniformMat4(name: string, mat: mat4): void {
 		if (this.programHandle === undefined) {
 			console.error("WebGLShaderProgram (setUniformMat4): Program handle is not initialized.");
 			return;

@@ -13,7 +13,11 @@ module.exports = {
             {
                 test: /\.glsl$/i,
                 type: 'asset/source'
-            }
+            },
+            {
+                test: /\.(png|jpg|gif)$/i,
+                type: 'asset/resource'
+            },
         ],
     },
     resolve: {

@@ -24,7 +24,8 @@ const Colors = {
     blue: new Color(0.0, 0.0, 1.0, 1.0),
     yellow: new Color(1.0, 1.0, 0.0, 1.0),
     cyan: new Color(0.0, 1.0, 1.0, 1.0),
-    magenta: new Color(1.0, 0.0, 1.0, 1.0)
+    magenta: new Color(1.0, 0.0, 1.0, 1.0),
+    orange: new Color(1.0, 0.5, 0.0, 1.0),
 };
 
 export { Color, Colors };
